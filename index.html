@@ -1,0 +1,263 @@
+<html>
+
+<head>
+  <title>Tugas 1</title>
+  <meta http-equiv="content-type" content="text/html" charset="ISO-8859-1">
+
+  <script type="text/javascript" src="gl-matrix-min.js"></script>
+
+  <script id="shader-fs" type="x-shader/x-fragment">
+    precision mediump float;
+      varying vec4 vColor;
+      void main(void) {
+        gl_FragColor = vColor;
+      }
+    </script>
+
+  <script id="shader-vs" type="x-shader/x-vertex">
+    attribute vec3 aVertexPosition;
+      attribute vec4 aVertexColor;
+      uniform mat4 uMVMatrix;
+      uniform mat4 uPMatrix;
+      varying vec4 vColor;
+      void main(void) {
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+        vColor = aVertexColor;
+      }
+    </script>
+  <script type="text/javascript">
+    /** @type {WebGLRenderingContext} */
+    var gl
+
+    function initGL(canvas) {
+      try {
+        gl = canvas.getContext('webgl')
+        gl.viewportWidth = canvas.width
+        gl.viewportHeight = canvas.height
+      } catch (e) {}
+      if (!gl) {
+        alert('Tidak bisa menginisialisasi WebGL')
+      }
+    }
+
+    function getShader(gl, id) {
+      var shaderScript = document.getElementById(id)
+      if (!shaderScript) {
+        return null
+      }
+      var str = ''
+      var k = shaderScript.firstChild
+      while (k) {
+        if (k.nodeType == 3) {
+          str += k.textContent
+        }
+        k = k.nextSibling
+      }
+      var shader
+      if (shaderScript.type == 'x-shader/x-fragment') {
+        shader = gl.createShader(gl.FRAGMENT_SHADER)
+      } else if (shaderScript.type = 'x-shader/x-vertex') {
+        shader = gl.createShader(gl.VERTEX_SHADER)
+      } else {
+        return null
+      }
+      gl.shaderSource(shader, str)
+      gl.compileShader(shader)
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        alert(gl.getShaderInfoLog(shader))
+        return null
+      }
+      return shader
+    }
+    var shaderProgram
+
+    function initShaders() {
+      var fragmentShader = getShader(gl, 'shader-fs')
+      var vertexShader = getShader(gl, 'shader-vs')
+      shaderProgram = gl.createProgram()
+      gl.attachShader(shaderProgram, fragmentShader)
+      gl.attachShader(shaderProgram, vertexShader)
+      gl.linkProgram(shaderProgram)
+      if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+        alert('Tidak bisa menginisialisasi shaders')
+      }
+      gl.useProgram(shaderProgram)
+      shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, 'aVertexPosition')
+      gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute)
+      shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, 'aVertexColor')
+      gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute)
+      shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, 'uPMatrix')
+      shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, 'uMVMatrix')
+    }
+    var mvMatrix = mat4.create()
+    var mvMatrixStack = []
+    var pMatrix = mat4.create()
+
+    function mvPushMatrix() {
+      var copy = mat4.create()
+      mat4.copy(copy, mvMatrix)
+      mvMatrixStack.push(copy)
+    }
+
+    function mvPopMatrix() {
+      if (mvMatrixStack.length == 0) {
+        throw "Tumpukan matriks kosong"
+      }
+      mvMatrix = mvMatrixStack.pop()
+    }
+
+    function setMatrixUniforms() {
+      gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix)
+      gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix)
+    }
+    var SPositionBuffer
+    var SColorBuffer
+    var NPositionBuffer
+    var NColorBuffer
+
+    function initBuffers() {
+      // S Position
+      SPositionBuffer = gl.createBuffer()
+      gl.bindBuffer(gl.ARRAY_BUFFER, SPositionBuffer)
+      var vertices = [
+        1, 1, 0,
+        -0.5, 1, 0,
+        1, 0.6, 0,
+        -1, 0.6, 0,
+
+        -1, 0.6, 0,
+        -0.5, 0.6, 0,
+        -1, 0.2, 0,
+        -0.5, -0.2, 0,
+
+        -0.5, -0.2, 0,
+        -0.5, 0.2, 0,
+        1, -0.2, 0,
+        0.5, 0.2, 0,
+
+        0.5, -0.2, 0,
+        1, -0.2, 0,
+        0.5, -1, 0,
+        1, -0.6, 0,
+
+        0.5, -0.6, 0,
+        -1, -0.6, 0,
+        0.5, -1, 0,
+        -1, -1, 0,
+
+
+      ]
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
+      SPositionBuffer.itemSize = 3
+      SPositionBuffer.numItems = 20
+      // N Color
+      SColorBuffer = gl.createBuffer()
+      gl.bindBuffer(gl.ARRAY_BUFFER, SColorBuffer)
+      colors = [];
+      for (var i = 0; i < 20; i++) {
+        colors = colors.concat([0, 0, 1.0, 1.0]);
+      }
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW)
+      SColorBuffer.itemSize = 4
+      SColorBuffer.numItems = 20
+      // N Position
+      NPositionBuffer = gl.createBuffer()
+      gl.bindBuffer(gl.ARRAY_BUFFER, NPositionBuffer)
+      vertices = [
+        -0.5, -1, 0,
+        -1, -1, 0,
+        -0.5, 1, 0,
+        -1, 1, 0,
+
+        -0.5, 0.5, 0,
+        0.5, -1, 0,
+        -0.5, 1, 0,
+        0.5, -0.5, 0,
+
+        1, -1, 0,
+        0.5, -1, 0,
+        1, 1, 0,
+        0.5, 1, 0,
+
+
+      ]
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
+      NPositionBuffer.itemSize = 3
+      NPositionBuffer.numItems = 12
+      // N Color
+      NColorBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, NColorBuffer);
+      colors = [];
+      for (var i = 0; i < 12; i++) {
+        colors = colors.concat([1, 0.4, 0.0, 1.0]);
+      }
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+      NColorBuffer.itemSize = 4;
+      NColorBuffer.numItems = 12;
+    }
+    var rS = 0
+    var rN = 0
+
+    function drawScene() {
+      gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight)
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+      mat4.perspective(pMatrix, glMatrix.toRadian(45), gl.viewportWidth / gl.viewportHeight, 0.1, 100.0)
+      mat4.identity(mvMatrix)
+      mat4.translate(mvMatrix, mvMatrix, [0.0, 1.5, -7.0])
+      mvPushMatrix()
+      mat4.rotate(mvMatrix, mvMatrix, glMatrix.toRadian(rS), [1.0, 0.0, 0.0])
+      //mat4.rotateY(mvMatrix, mvMatrix, glMatrix.toRadian(rS))
+      gl.bindBuffer(gl.ARRAY_BUFFER, SPositionBuffer)
+      gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, SPositionBuffer.itemSize, gl.FLOAT, false, 0, 0)
+      gl.bindBuffer(gl.ARRAY_BUFFER, SColorBuffer)
+      gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, SColorBuffer.itemSize, gl.FLOAT, false, 0, 0)
+      setMatrixUniforms()
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, SPositionBuffer.numItems)
+      mvPopMatrix()
+      mat4.translate(mvMatrix, mvMatrix, [0.0, -3.0, 0.0])
+      mvPushMatrix()
+      mat4.rotate(mvMatrix, mvMatrix, glMatrix.toRadian(rN), [0.0, 1.0, 0.0])
+      //mat4.rotateX(mvMatrix, mvMatrix, glMatrix.toRadian(rN))
+      gl.bindBuffer(gl.ARRAY_BUFFER, NPositionBuffer)
+      gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, NPositionBuffer.itemSize, gl.FLOAT, false, 0, 0)
+      gl.bindBuffer(gl.ARRAY_BUFFER, NColorBuffer)
+      gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, NColorBuffer.itemSize, gl.FLOAT, false, 0, 0)
+      setMatrixUniforms()
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, NPositionBuffer.numItems)
+      mvPopMatrix()
+    }
+    var lastTime = 0
+
+    function animate() {
+      var timeNow = new Date().getTime()
+      if (lastTime != 0) {
+        var elapsed = timeNow - lastTime
+        rS += (90 * elapsed) / 1000.0
+        rN += (75 * elapsed) / 1000.0
+      }
+      lastTime = timeNow
+    }
+
+    function tick() {
+      requestAnimationFrame(tick)
+      drawScene()
+      animate()
+    }
+
+    function webGLStart() {
+      var canvas = document.getElementById('mycanvas')
+      initGL(canvas)
+      initShaders()
+      initBuffers()
+      gl.clearColor(0.0, 0.0, 0.0, 1.0)
+      gl.enable(gl.DEPTH_TEST)
+      tick()
+    }
+  </script>
+</head>
+
+<body onload="webGLStart();">
+  <canvas id="mycanvas" style="border: none" width="500" height="500"></canvas>
+</body>
+
+</html>
