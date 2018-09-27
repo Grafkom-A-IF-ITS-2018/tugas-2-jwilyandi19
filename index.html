@@ -1,7 +1,7 @@
 <html>
 
 <head>
-  <title>Tugas 1</title>
+  <title>Tugas 2</title>
   <meta http-equiv="content-type" content="text/html" charset="ISO-8859-1">
 
   <script type="text/javascript" src="gl-matrix-min.js"></script>
@@ -112,8 +112,10 @@
     }
     var SPositionBuffer
     var SColorBuffer
-    var NPositionBuffer
-    var NColorBuffer
+    var cubePositionBuffer
+    var cubeColorBuffer
+    var quantity;
+    var colorQuantity;
 
     function initBuffers() {
       // S Position
@@ -147,65 +149,91 @@
 
 
       ]
+      quantity = vertices.length / 3;
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
       SPositionBuffer.itemSize = 3
-      SPositionBuffer.numItems = 20
-      // N Color
+      SPositionBuffer.numItems = quantity
+      // S Color
       SColorBuffer = gl.createBuffer()
       gl.bindBuffer(gl.ARRAY_BUFFER, SColorBuffer)
       colors = [];
-      for (var i = 0; i < 20; i++) {
+      for (var i = 0; i < quantity; i++) {
         colors = colors.concat([0, 0, 1.0, 1.0]);
       }
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW)
       SColorBuffer.itemSize = 4
-      SColorBuffer.numItems = 20
-      // N Position
-      NPositionBuffer = gl.createBuffer()
-      gl.bindBuffer(gl.ARRAY_BUFFER, NPositionBuffer)
+      SColorBuffer.numItems = quantity
+      // Wirecube position
+      cubePositionBuffer = gl.createBuffer()
+      gl.bindBuffer(gl.ARRAY_BUFFER, cubePositionBuffer)
       vertices = [
-        -0.5, -1, 0,
-        -1, -1, 0,
-        -0.5, 1, 0,
-        -1, 1, 0,
+      -1, 1, 0,
+        1, 1, 0,
 
-        -0.5, 0.5, 0,
-        0.5, -1, 0,
-        -0.5, 1, 0,
-        0.5, -0.5, 0,
+        1, 1, 0,
+        1, -1, 0,
 
         1, -1, 0,
-        0.5, -1, 0,
+        -1, -1, 0,
+        
+        -1, -1, 0,
+        -1, 1, 0,
+
+        -1, 1, -1,
+        1, 1, -1,
+
+        1, 1, -1,
+        1, -1, -1,
+
+        1, -1, -1,
+        -1, -1, -1,
+
+        -1, -1, -1,
+        -1, 1, -1,
+
+        -1, 1, 0,
+        -1, 1, -1,
+
         1, 1, 0,
-        0.5, 1, 0,
+        1, 1, -1,
+
+        1, -1, 0,
+        1, -1, -1,
+
+        -1, -1, 0,
+        -1, -1, -1,
 
 
       ]
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
-      NPositionBuffer.itemSize = 3
-      NPositionBuffer.numItems = 12
-      // N Color
-      NColorBuffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, NColorBuffer);
+      var colorQuantity = vertices.length / 3;
+      cubePositionBuffer.itemSize = 3
+      cubePositionBuffer.numItems = colorQuantity
+      // Wirecube Color
+      cubeColorBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, cubeColorBuffer);
       colors = [];
-      for (var i = 0; i < 12; i++) {
+      for (var i = 0; i < colorQuantity; i++) {
         colors = colors.concat([1, 0.4, 0.0, 1.0]);
       }
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-      NColorBuffer.itemSize = 4;
-      NColorBuffer.numItems = 12;
+      cubeColorBuffer.itemSize = 4;
+      cubeColorBuffer.numItems = colorQuantity;
+
+
     }
     var rS = 0
-    var rN = 0
+    var rCube = 0
 
     function drawScene() {
       gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight)
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
       mat4.perspective(pMatrix, glMatrix.toRadian(45), gl.viewportWidth / gl.viewportHeight, 0.1, 100.0)
       mat4.identity(mvMatrix)
-      mat4.translate(mvMatrix, mvMatrix, [0.0, 1.5, -7.0])
+      mat4.translate(mvMatrix, mvMatrix, [0.0, 1.0, -10.0])
       mvPushMatrix()
-      mat4.rotate(mvMatrix, mvMatrix, glMatrix.toRadian(rS), [1.0, 0.0, 0.0])
+      //console.log(rS);
+      mat4.rotate(mvMatrix, mvMatrix, glMatrix.toRadian(rS), [0.0, 1.0, 0.0])
       //mat4.rotateY(mvMatrix, mvMatrix, glMatrix.toRadian(rS))
       gl.bindBuffer(gl.ARRAY_BUFFER, SPositionBuffer)
       gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, SPositionBuffer.itemSize, gl.FLOAT, false, 0, 0)
@@ -214,16 +242,16 @@
       setMatrixUniforms()
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, SPositionBuffer.numItems)
       mvPopMatrix()
-      mat4.translate(mvMatrix, mvMatrix, [0.0, -3.0, 0.0])
+      mat4.translate(mvMatrix, mvMatrix, [0.0, -1.0, 7.5])
       mvPushMatrix()
-      mat4.rotate(mvMatrix, mvMatrix, glMatrix.toRadian(rN), [0.0, 1.0, 0.0])
-      //mat4.rotateX(mvMatrix, mvMatrix, glMatrix.toRadian(rN))
-      gl.bindBuffer(gl.ARRAY_BUFFER, NPositionBuffer)
-      gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, NPositionBuffer.itemSize, gl.FLOAT, false, 0, 0)
-      gl.bindBuffer(gl.ARRAY_BUFFER, NColorBuffer)
-      gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, NColorBuffer.itemSize, gl.FLOAT, false, 0, 0)
+      //mat4.rotate(mvMatrix, mvMatrix, glMatrix.toRadian(rCube), [0.0, 1.0, 0.0])
+      //mat4.rotateX(mvMatrix, mvMatrix, glMatrix.toRadian(rCube))
+      gl.bindBuffer(gl.ARRAY_BUFFER, cubePositionBuffer)
+      gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubePositionBuffer.itemSize, gl.FLOAT, false, 0, 0)
+      gl.bindBuffer(gl.ARRAY_BUFFER, cubeColorBuffer)
+      gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, cubeColorBuffer.itemSize, gl.FLOAT, false, 0, 0)
       setMatrixUniforms()
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, NPositionBuffer.numItems)
+      gl.drawArrays(gl.LINES, 0, cubePositionBuffer.numItems)
       mvPopMatrix()
     }
     var lastTime = 0
@@ -233,7 +261,7 @@
       if (lastTime != 0) {
         var elapsed = timeNow - lastTime
         rS += (90 * elapsed) / 1000.0
-        rN += (75 * elapsed) / 1000.0
+        rCube += (75 * elapsed) / 1000.0
       }
       lastTime = timeNow
     }
