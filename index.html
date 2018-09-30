@@ -216,12 +216,14 @@
     }
 
     function rotatingMatrix(obj) {
-      var deg = obj.xDir * 5;
+      //console.log("HAI");
+      deg = obj.xDir * 1;
       var rad = deg * (Math.PI / 180)
         for(var i=0; i<obj.vertices.length/3; i++) {
-          obj[i*3] = Math.cos(rad)*(obj[i*3]-obj.xPos) - Math.sin(rad)*(obj[i*3+2]-obj.zPos) + obj.xPos
-          obj[i*3 + 2] = Math.sin(rad)*(obj[i*3]-obj.xPos) + Math.cos(rad)*(obj[i*3+2]-obj.zPos) + obj.zPos 
+          obj.vertices[i*3] = Math.cos(rad)*(obj.vertices[i*3]-obj.xPos) - Math.sin(rad)*(obj.vertices[i*3+2]-obj.zPos) + obj.xPos
+          obj.vertices[i*3 + 2] = Math.sin(rad)*(obj.vertices[i*3]-obj.xPos) + Math.cos(rad)*(obj.vertices[i*3+2]-obj.zPos) + obj.zPos 
         }
+      //console.log(obj.vertices)
     }
 
     function updatePosition() {
@@ -288,7 +290,7 @@
       cubeColorBuffer.itemSize = 4;
       cubeColorBuffer.numItems = colorQuantity;
 
-      //scalingMatrix(cube,10)
+      scalingMatrix(cube,3)
 
       
     }
@@ -296,7 +298,7 @@
       //console.log(SPositionBuffer);
       gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight)
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-      mat4.perspective(pMatrix, glMatrix.toRadian(45), gl.viewportWidth / gl.viewportHeight, 0.1, 100.0)
+      mat4.perspective(pMatrix, glMatrix.toRadian(60), gl.viewportWidth / gl.viewportHeight, 0.1, 100.0)
       mat4.identity(mvMatrix)
       //collitionDetection(xPos, yPos, zPos);
       //var positionTranslated = translateMatrix(xPos, yPos, zPos);
@@ -324,7 +326,7 @@
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, SPositionBuffer.numItems)
       mvPopMatrix()
       //console.log(mvMatrix)
-      mat4.translate(mvMatrix, mvMatrix, [0.0, 0.0, 6.25])
+      mat4.translate(mvMatrix, mvMatrix, [0.0, 0.0, 0.0])
       mvPushMatrix()
       //mat4.rotate(mvMatrix, mvMatrix, glMatrix.toRadian(rCube), [0.0, 1.0, 0.0])
       //mat4.rotateX(mvMatrix, mvMatrix, glMatrix.toRadian(rCube))
@@ -367,7 +369,7 @@
 </head>
 
 <body onload="webGLStart();">
-  <canvas id="mycanvas" style="border: none" width="500" height="500"></canvas>
+  <canvas id="mycanvas" style="border: none" width="650" height="650"></canvas>
 </body>
 
 </html>
