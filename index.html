@@ -217,7 +217,7 @@
 
     function rotatingMatrix(obj) {
       //console.log("HAI");
-      deg = obj.xDir * 1;
+      deg = obj.xDir * 2;
       var rad = deg * (Math.PI / 180)
         for(var i=0; i<obj.vertices.length/3; i++) {
           obj.vertices[i*3] = Math.cos(rad)*(obj.vertices[i*3]-obj.xPos) - Math.sin(rad)*(obj.vertices[i*3+2]-obj.zPos) + obj.xPos
@@ -290,7 +290,7 @@
       cubeColorBuffer.itemSize = 4;
       cubeColorBuffer.numItems = colorQuantity;
 
-      scalingMatrix(cube,3)
+      scalingMatrix(cube,0.1)
 
       
     }
@@ -298,7 +298,7 @@
       //console.log(SPositionBuffer);
       gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight)
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-      mat4.perspective(pMatrix, glMatrix.toRadian(60), gl.viewportWidth / gl.viewportHeight, 0.1, 100.0)
+      mat4.perspective(pMatrix, glMatrix.toRadian(45), gl.viewportWidth / gl.viewportHeight, 0.1, 100.0)
       mat4.identity(mvMatrix)
       //collitionDetection(xPos, yPos, zPos);
       //var positionTranslated = translateMatrix(xPos, yPos, zPos);
@@ -326,7 +326,7 @@
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, SPositionBuffer.numItems)
       mvPopMatrix()
       //console.log(mvMatrix)
-      mat4.translate(mvMatrix, mvMatrix, [0.0, 0.0, 0.0])
+      mat4.translate(mvMatrix, mvMatrix, [0.0, 0.0, 6.25])
       mvPushMatrix()
       //mat4.rotate(mvMatrix, mvMatrix, glMatrix.toRadian(rCube), [0.0, 1.0, 0.0])
       //mat4.rotateX(mvMatrix, mvMatrix, glMatrix.toRadian(rCube))
