@@ -92,7 +92,7 @@
     var mvMatrix = mat4.create()
     var mvMatrixStack = []
     var pMatrix = mat4.create()
-
+    //console.log(mvMatrix)
     function mvPushMatrix() {
       var copy = mat4.create()
       mat4.copy(copy, mvMatrix)
@@ -196,11 +196,59 @@
 
 
       ],
+      Rot:0
+    }
+
+    function translatingMatrix(obj) {
+      for(var i=0; i<obj.vertices.length/3; i++) {
+        obj.vertices[i*3] +=  obj.xSpeed*obj.xDir;
+        obj.vertices[i*3 + 1] += obj.ySpeed*obj.yDir;
+        obj.vertices[i*3 + 2] += obj.zSpeed*obj.zDir;
+      } 
+    }
+
+    function scalingMatrix(obj,size) {
+      console.log("MASUK")
+      for(var i=0; i<obj.vertices.length; i++) {
+        obj.vertices[i] *= size;
+      }
+      //console.log(obj.vertices)
+    }
+
+    function rotatingMatrix(obj) {
+      var deg = obj.xDir * 5;
+      var rad = deg * (Math.PI / 180)
+        for(var i=0; i<obj.vertices.length/3; i++) {
+          obj[i*3] = Math.cos(rad)*(obj[i*3]-obj.xPos) - Math.sin(rad)*(obj[i*3+2]-obj.zPos) + obj.xPos
+          obj[i*3 + 2] = Math.sin(rad)*(obj[i*3]-obj.xPos) + Math.cos(rad)*(obj[i*3+2]-obj.zPos) + obj.zPos 
+        }
+    }
+
+    function updatePosition() {
+      gl.bindBuffer(gl.ARRAY_BUFFER,SPositionBuffer)
+      translatingMatrix(S)
+      S.xPos += S.xDir * S.xSpeed
+      S.yPos += S.yDir * S.ySpeed
+      S.zPos += S.zDir + S.zSpeed
+      rotatingMatrix(S)
+      gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(S.vertices),gl.STATIC_DRAW)
+    }
+
+    function collitionDetection(transX,transY,transZ,obj) {
+      if(transX <= -4.5 || transX >= 4.5) {
+        obj.xDir *= -1;
+      }
+      if(transY <= -4.5 || transY >= 4.5) {
+        obj.yDir *= -1;
+      }
+      if(transZ <= -12.0 || transZ >= -4.0) {
+        obj.zDir *= -1;
+      } 
     }
 
     function initBuffers() {
       // S Position
-      console.log("ASIK");
+      //console.log("ASIK");
       SPositionBuffer = gl.createBuffer()
       gl.bindBuffer(gl.ARRAY_BUFFER, SPositionBuffer)
       
@@ -240,42 +288,10 @@
       cubeColorBuffer.itemSize = 4;
       cubeColorBuffer.numItems = colorQuantity;
 
-
-    }
-    var rCube = 0
-    
-    function translateMatrix(obj) {
-      for(var i=0; i<obj.vertices.length/3; i++) {
-        obj.vertices[i*3] +=  obj.xSpeed * obj.xDir;
-        obj.vertices[i*3 + 1] += obj.ySpeed * obj.yDir;
-        obj.vertices[i*3 + 2] += obj.zSpeed * obj.zDir;
-      }
-      obj.xPos += obj.xSpeed;
-      obj.yPos += obj.ySpeed;
-      obj.zPos += obj.zSpeed; 
-    }
-
-    function scalingMatrix(obj,size) {
-      for(var i=0; i<obj.vertices.length; i++) {
-        obj.vertices[i] *= size;
-      }
-    }
-
-    function collitionDetection(transX,transY,transZ,obj) {
-      if(transX <= -4.5 || transX >= 4.5) {
-        obj.xDir *= -1;
-      }
-      if(transY <= -4.5 || transY >= 4.5) {
-        obj.yDir *= -1;
-      }
-
-      if(transZ <= -12.0 || transZ >= -4.0) {
-        obj.zDir *= -1;
-      }
+      //scalingMatrix(cube,10)
 
       
     }
-
     function drawScene() {
       //console.log(SPositionBuffer);
       gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight)
@@ -288,10 +304,17 @@
       //yPos = positionTranslated[1];
       //zPos = positionTranslated[2];
       //console.log(zPos);
-      //mat4.translate(mvMatrix, mvMatrix, [xPos, yPos, zPos])
+      //console.log(mvMatrix)
+      //tes += 0.1
+      mat4.translate(mvMatrix, mvMatrix, [0.0, 0.0, -10.0])
+      updatePosition();
+      //console.log(S.xPos)
+      //console.log(S.yPos)
+      //console.log(S.zPos)
+      //translateMatrix(S)
       mvPushMatrix()
       //console.log(rS);
-      //mat4.rotate(mvMatrix, mvMatrix, glMatrix.toRadian(rS), [0.0,1.0, 0.0])
+      //mat4.rotate(mvMatrix, mvMatrix, glMatrix.toRadian(S.Rot), [0.0,1.0, 0.0])
       //mat4.rotateY(mvMatrix, mvMatrix, glMatrix.toRadian(rS))
       gl.bindBuffer(gl.ARRAY_BUFFER, SPositionBuffer)
       gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, SPositionBuffer.itemSize, gl.FLOAT, false, 0, 0)
@@ -300,7 +323,8 @@
       setMatrixUniforms()
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, SPositionBuffer.numItems)
       mvPopMatrix()
-      //mat4.translate(mvMatrix, mvMatrix, [-xPos, -yPos, -zPos-4])
+      //console.log(mvMatrix)
+      mat4.translate(mvMatrix, mvMatrix, [0.0, 0.0, 6.25])
       mvPushMatrix()
       //mat4.rotate(mvMatrix, mvMatrix, glMatrix.toRadian(rCube), [0.0, 1.0, 0.0])
       //mat4.rotateX(mvMatrix, mvMatrix, glMatrix.toRadian(rCube))
@@ -319,7 +343,7 @@
       if (lastTime != 0) {
         var elapsed = timeNow - lastTime
         S.Rot += (90 * elapsed) / 1000.0
-        rCube += (75 * elapsed) / 1000.0
+        cube.Rot += (75 * elapsed) / 1000.0
       }
       lastTime = timeNow
     }
