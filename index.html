@@ -120,6 +120,7 @@
     var posX = 0;
     var posY = -1;
     var posZ = 10;
+    var dir = 1;
 
     var S = {
       vertices: [
@@ -150,7 +151,7 @@
       ],
       Rot:0,
       xPos:0,yPos:1,zPos:0,
-      xSpeed:0.01,ySpeed:0.01,zSpeed:0.01,
+      xSpeed:0.05,ySpeed:0.02,zSpeed:0.1,
       xDir:1,yDir:1,zDir:1,
 
 
@@ -214,10 +215,12 @@
       }
       //console.log(obj.vertices)
     }
-
+    
     function rotatingMatrix(obj) {
       //console.log("HAI");
-      deg = obj.xDir * 5;
+      var tempdeg;
+      deg = dir * 5;
+      console.log(deg);
       var rad = deg * (Math.PI / 180)
         for(var i=0; i<obj.vertices.length/3; i++) {
           var xRot = obj.vertices[i*3]-obj.xPos
@@ -234,6 +237,7 @@
       S.xPos += S.xDir * S.xSpeed
       S.yPos += S.yDir * S.ySpeed
       S.zPos += S.zDir * S.zSpeed
+
       rotatingMatrix(S)
       gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(S.vertices),gl.STATIC_DRAW)
     }
@@ -241,12 +245,19 @@
     function collitionDetection() {
       if(S.xPos >= 4.25 || S.xPos <= -4.25) {
         S.xDir *= -1
+        dir *= -1
+        //rotatingMatrix(S,S.xDir)
+        
       }
       if(S.yPos >= 4.25 || S.yPos <= -4.25) {
         S.yDir *= -1
+        dir *= -1 
+        //rotatingMatrix(S,S.yDir)
       }
       if(S.zPos >= 4.25 || S.zPos <= -4.25) {
         S.zDir *= -1
+        dir *= -1
+        //rotatingMatrix(S,S.zDir)
       }
     }
 
@@ -268,7 +279,7 @@
       var SZColor = Math.random();
       colors = [];
       for (var i = 0; i < quantity; i++) {
-        colors = colors.concat([SXColor, SYColor, SZColor, 1.0]);
+        colors = colors.concat([Math.random(), Math.random(), Math.random(), 1.0]);
       }
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW)
       SColorBuffer.itemSize = 4
@@ -311,7 +322,7 @@
       //console.log(zPos);
       //console.log(mvMatrix)
       //tes += 0.1
-      mat4.translate(mvMatrix, mvMatrix, [0.0, 0.0, -20.0])
+      mat4.translate(mvMatrix, mvMatrix, [0.0, 0.0, -30.0])
       console.log(S.xPos, S.yPos, S.zPos)
       collitionDetection()
       updatePosition();
