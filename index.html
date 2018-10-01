@@ -149,7 +149,7 @@
         -1, -1, 0,
       ],
       Rot:0,
-      xPos:0,yPos:0,zPos:0,
+      xPos:0,yPos:1,zPos:0,
       xSpeed:0.01,ySpeed:0.01,zSpeed:0.01,
       xDir:1,yDir:1,zDir:1,
 
@@ -217,7 +217,7 @@
 
     function rotatingMatrix(obj) {
       //console.log("HAI");
-      deg = obj.xDir * 1;
+      deg = obj.xDir * 5;
       var rad = deg * (Math.PI / 180)
         for(var i=0; i<obj.vertices.length/3; i++) {
           var xRot = obj.vertices[i*3]-obj.xPos
@@ -238,16 +238,16 @@
       gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(S.vertices),gl.STATIC_DRAW)
     }
 
-    function collitionDetection(transX,transY,transZ,obj) {
-      if(transX <= -4.5 || transX >= 4.5) {
-        obj.xDir *= -1;
+    function collitionDetection() {
+      if(S.xPos >= 4.25 || S.xPos <= -4.25) {
+        S.xDir *= -1
       }
-      if(transY <= -4.5 || transY >= 4.5) {
-        obj.yDir *= -1;
+      if(S.yPos >= 4.25 || S.yPos <= -4.25) {
+        S.yDir *= -1
       }
-      if(transZ <= -12.0 || transZ >= -4.0) {
-        obj.zDir *= -1;
-      } 
+      if(S.zPos >= 4.25 || S.zPos <= -4.25) {
+        S.zDir *= -1
+      }
     }
 
     function initBuffers() {
@@ -313,6 +313,7 @@
       //tes += 0.1
       mat4.translate(mvMatrix, mvMatrix, [0.0, 0.0, -20.0])
       console.log(S.xPos, S.yPos, S.zPos)
+      collitionDetection()
       updatePosition();
       //console.log(S.xPos)
       //console.log(S.yPos)
