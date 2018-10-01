@@ -217,11 +217,13 @@
 
     function rotatingMatrix(obj) {
       //console.log("HAI");
-      deg = obj.xDir * 2;
+      deg = obj.xDir * 1;
       var rad = deg * (Math.PI / 180)
         for(var i=0; i<obj.vertices.length/3; i++) {
-          obj.vertices[i*3] = Math.cos(rad)*(obj.vertices[i*3]-obj.xPos) - Math.sin(rad)*(obj.vertices[i*3+2]-obj.zPos) + obj.xPos
-          obj.vertices[i*3 + 2] = Math.sin(rad)*(obj.vertices[i*3]-obj.xPos) + Math.cos(rad)*(obj.vertices[i*3+2]-obj.zPos) + obj.zPos 
+          var xRot = obj.vertices[i*3]-obj.xPos
+          var zRot = obj.vertices[i*3+2]-obj.zPos
+          obj.vertices[i*3] = Math.cos(rad)*(xRot) - Math.sin(rad)*(zRot) + obj.xPos
+          obj.vertices[i*3 + 2] = Math.sin(rad)*(xRot) + Math.cos(rad)*(zRot) + obj.zPos 
         }
       //console.log(obj.vertices)
     }
@@ -231,7 +233,7 @@
       translatingMatrix(S)
       S.xPos += S.xDir * S.xSpeed
       S.yPos += S.yDir * S.ySpeed
-      S.zPos += S.zDir + S.zSpeed
+      S.zPos += S.zDir * S.zSpeed
       rotatingMatrix(S)
       gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(S.vertices),gl.STATIC_DRAW)
     }
@@ -274,8 +276,9 @@
       // Wirecube position
       cubePositionBuffer = gl.createBuffer()
       gl.bindBuffer(gl.ARRAY_BUFFER, cubePositionBuffer)
-      
+      scalingMatrix(cube,5)
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cube.vertices), gl.STATIC_DRAW)
+
       var colorQuantity = cube.vertices.length / 3;
       cubePositionBuffer.itemSize = 3
       cubePositionBuffer.numItems = colorQuantity
@@ -290,7 +293,7 @@
       cubeColorBuffer.itemSize = 4;
       cubeColorBuffer.numItems = colorQuantity;
 
-      scalingMatrix(cube,0.1)
+      
 
       
     }
@@ -308,7 +311,8 @@
       //console.log(zPos);
       //console.log(mvMatrix)
       //tes += 0.1
-      mat4.translate(mvMatrix, mvMatrix, [0.0, 0.0, -10.0])
+      mat4.translate(mvMatrix, mvMatrix, [0.0, 0.0, -20.0])
+      console.log(S.xPos, S.yPos, S.zPos)
       updatePosition();
       //console.log(S.xPos)
       //console.log(S.yPos)
@@ -326,7 +330,7 @@
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, SPositionBuffer.numItems)
       mvPopMatrix()
       //console.log(mvMatrix)
-      mat4.translate(mvMatrix, mvMatrix, [0.0, 0.0, 6.25])
+      mat4.translate(mvMatrix, mvMatrix, [0.0, 0.0, 0.0])
       mvPushMatrix()
       //mat4.rotate(mvMatrix, mvMatrix, glMatrix.toRadian(rCube), [0.0, 1.0, 0.0])
       //mat4.rotateX(mvMatrix, mvMatrix, glMatrix.toRadian(rCube))
