@@ -249,7 +249,7 @@
         //rotatingMatrix(S,S.xDir)
         
       }
-      if(S.yPos >= 4.25 || S.yPos <= -4.25) {
+      if(S.yPos >= 5 || S.yPos <= -3.5) {
         S.yDir *= -1
         dir *= -1 
         //rotatingMatrix(S,S.yDir)
@@ -298,7 +298,7 @@
       gl.bindBuffer(gl.ARRAY_BUFFER, cubeColorBuffer);
       colors = [];
       for (var i = 0; i < colorQuantity; i++) {
-        colors = colors.concat([1, 0.4, 0.0, 1.0]);
+        colors = colors.concat([Math.random(), Math.random(), Math.random(), 1.0]);
       }
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
       cubeColorBuffer.itemSize = 4;
@@ -385,7 +385,7 @@
 </head>
 
 <body onload="webGLStart();">
-  <canvas id="mycanvas" style="border: none" width="650" height="650"></canvas>
+  <canvas id="mycanvas" style="border: none" width="500" height="500"></canvas>
 </body>
 
 </html>
